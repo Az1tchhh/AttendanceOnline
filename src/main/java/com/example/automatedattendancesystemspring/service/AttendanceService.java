@@ -19,7 +19,7 @@ public class AttendanceService {
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
-        WebDriverManager.chromedriver().setup();
+//        WebDriverManager.chromedriver().setup();
         WebDriver driver = new ChromeDriver(options);
         System.setProperty("webdriver.chrome.driver", "C:/Users/azama/Downloads/chromedriver_win32/chromedriver.exe");
 
