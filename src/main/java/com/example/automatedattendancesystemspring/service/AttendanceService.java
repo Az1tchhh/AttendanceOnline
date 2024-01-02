@@ -16,10 +16,10 @@ import java.util.Base64;
 public class AttendanceService {
     public String markAttendance(String email, String password) throws InterruptedException {
 
-//        ChromeOptions options = new ChromeOptions();
-//        options.addArguments("--headless");
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless");
         WebDriverManager.chromedriver().setup();
-        WebDriver driver = new ChromeDriver();
+        WebDriver driver = new ChromeDriver(options);
 //        driver.manage().window().maximize();
         try {
             driver.get("https://wsp.kbtu.kz");
