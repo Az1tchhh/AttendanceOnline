@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class AttendanceService {
@@ -20,6 +21,8 @@ public class AttendanceService {
         options.addArguments("--headless");
         WebDriverManager.chromedriver().setup();
         WebDriver driver = new ChromeDriver(options);
+        System.setProperty("webdriver.chrome.driver", "C:/Users/azama/Downloads/chromedriver_win32/chromedriver.exe");
+
 //        driver.manage().window().maximize();
         try {
             driver.get("https://wsp.kbtu.kz");
