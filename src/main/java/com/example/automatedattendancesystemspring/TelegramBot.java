@@ -1,6 +1,7 @@
 package com.example.automatedattendancesystemspring;
 
 import com.example.automatedattendancesystemspring.config.BotConfig;
+import com.example.automatedattendancesystemspring.models.Student;
 import com.example.automatedattendancesystemspring.service.AttendanceService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,13 +14,16 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @AllArgsConstructor
 public class TelegramBot extends TelegramLongPollingBot{
     private final BotConfig botConfig;
-    private final AttendanceService attendanceService;
-
+    private AttendanceService attendanceService;
+    private Map<Long, Boolean> waitingForCredentials;
+    private Map<Long, Boolean> waitingForLogin;
     @Override
     public String getBotUsername() {
         return botConfig.getBotName();
@@ -41,42 +45,70 @@ public class TelegramBot extends TelegramLongPollingBot{
                 case "/start":
                     startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                     break;
+                case "/attendanceInfo":
+                    sendMessage(chatId, "Send your login...");
+                    waitingForLogin.put(chatId, true);
+                    break;
+                case "/mark":
+                    sendMessage(chatId, "Send your login and password in this format: login:password");
+                    waitingForCredentials.put(chatId, true);
+                    break;
                 default:
-                    if (messageText.contains(":")){
-                        String[] credentials = messageText.split(":");
-                        String login = credentials[0];
-                        String password = credentials[1];
-                        sendMessage(chatId, "Marking attendance...");
-                        try {
-                            result = attendanceService.markAttendance(login, password);
-                        } catch (InterruptedException e) {
-                            sendMessage(chatId,"Something went wrong");
-                        }
-                        if(result == "Something went wrong"){
-                            sendMessage(chatId, result);
-                            break;
-                        }
-                        byte[] decodedScreen = Base64.getDecoder().decode(result);
-                        ByteArrayInputStream bais = new ByteArrayInputStream(decodedScreen);
+                    if (waitingForLogin.get(chatId) != null && waitingForLogin.get(chatId)){
+                        try{
+                            sendMessage(chatId,"Providing information about marked attendances");
+                            Student student = attendanceService.getStudent(messageText);
+                            if(student != null)
+                                sendMessage(chatId, student.toString());
+                            else sendMessage(chatId, "Subscribe for the attendance now!");
+                            waitingForLogin.put(chatId, false);
+                        }catch (Exception e){
 
-                        // Create a SendPhoto object with the chat ID and the InputStream
-                        SendPhoto photo = new SendPhoto();
-                        photo.setChatId(chatId);
-                        photo.setPhoto(new InputFile(bais, "screenshot.png"));
-                        try {
-                            execute(photo);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
+                            sendMessage(chatId, "Exception appeared, sorry(");
+                            throw e;
                         }
-                        sendMessage(chatId, "Done");
-                        break;
                     }
+                    if (waitingForCredentials.get(chatId) != null && waitingForCredentials.get(chatId)) {
+                        if (messageText.contains(":")) {
+                            String[] credentials = messageText.split(":");
+                            String login = credentials[0];
+                            String password = credentials[1];
+                            sendMessage(chatId, "Marking attendance...");
+                            try {
+                                result = attendanceService.markAttendance(login, password);
+                            } catch (InterruptedException e) {
+                                sendMessage(chatId, "Something went wrong");
+                            }
+                            if (result == "Something went wrong") {
+                                sendMessage(chatId, result);
+                                break;
+                            }
+                            byte[] decodedScreen = Base64.getDecoder().decode(result);
+                            ByteArrayInputStream bais = new ByteArrayInputStream(decodedScreen);
+
+                            // Create a SendPhoto object with the chat ID and the InputStream
+                            SendPhoto photo = new SendPhoto();
+                            photo.setChatId(chatId);
+                            photo.setPhoto(new InputFile(bais, "screenshot.png"));
+                            try {
+                                execute(photo);
+                            } catch (TelegramApiException e) {
+                                throw new RuntimeException(e);
+                            }
+                            sendMessage(chatId, "Done");
+                            break;
+                        } else sendMessage(chatId, "Incorrect format of data");
+
+                        waitingForCredentials.put(chatId, false);
+                    }
+                    break;
             }
         }
     }
     private void startCommandReceived(Long chatId, String name) {
         String answer = "Hi, " + name + ", nice to meet you!" + "\n" +
-                "Please send your login and password in the format: login:password";
+                "If you want to sign attendance whenever it starts," + "\n" +
+                "type /mark below";
         sendMessage(chatId, answer);
     }
 
