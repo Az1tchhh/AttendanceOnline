@@ -103,4 +103,7 @@ public class AttendanceService {
         attendanceInfoRepository.save(attendanceInfo);
 
     }
+    public void cleanDB(){
+        attendanceInfoRepository.deleteAll();
+    }
 }

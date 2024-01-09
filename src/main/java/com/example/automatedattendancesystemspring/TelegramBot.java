@@ -45,7 +45,7 @@ public class TelegramBot extends TelegramLongPollingBot{
                 case "/start":
                     startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                     break;
-                case "/attendanceInfo":
+                case "/attendanceinfo":
                     sendMessage(chatId, "Send your login...");
                     waitingForLogin.put(chatId, true);
                     break;
