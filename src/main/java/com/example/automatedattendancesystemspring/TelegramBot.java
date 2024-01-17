@@ -4,6 +4,7 @@ import com.example.automatedattendancesystemspring.config.BotConfig;
 import com.example.automatedattendancesystemspring.models.Student;
 import com.example.automatedattendancesystemspring.service.AttendanceService;
 import lombok.AllArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -16,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 @AllArgsConstructor
@@ -36,6 +38,7 @@ public class TelegramBot extends TelegramLongPollingBot{
 
     @Override
     public void onUpdateReceived(Update update) {
+        boolean isScanning = false;
         String result = "";
         if(update.hasMessage() && update.getMessage().hasText()){
             String messageText = update.getMessage().getText();
@@ -74,27 +77,42 @@ public class TelegramBot extends TelegramLongPollingBot{
                             String login = credentials[0];
                             String password = credentials[1];
                             sendMessage(chatId, "Marking attendance...");
+                            isScanning = true;
                             try {
-                                result = attendanceService.markAttendance(login, password);
+                                while (isScanning){
+
+                                    String msg = update.getMessage().getText();
+                                    System.out.println(msg);
+                                    if(msg.equals("/stop")){
+                                        isScanning = false;
+                                    }
+                                    result = attendanceService.markAttendance(login, password);
+                                    if (result.equals("Something went wrong")) {
+                                        sendMessage(chatId, result);
+                                        break;
+                                    }
+                                    else if(result.equals("no attendance")){
+                                        sendMessage(chatId, "Scanning for any attendance. Enter '/stop' to terminate the process");
+                                        continue;
+                                    }
+                                    byte[] decodedScreen = Base64.getDecoder().decode(result);
+                                    ByteArrayInputStream bais = new ByteArrayInputStream(decodedScreen);
+
+                                    // Create a SendPhoto object with the chat ID and the InputStream
+                                    SendPhoto photo = new SendPhoto();
+                                    photo.setChatId(chatId);
+                                    photo.setPhoto(new InputFile(bais, "screenshot.png"));
+                                    try {
+                                        execute(photo);
+                                    } catch (TelegramApiException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+
                             } catch (InterruptedException e) {
                                 sendMessage(chatId, "Something went wrong");
                             }
-                            if (result == "Something went wrong") {
-                                sendMessage(chatId, result);
-                                break;
-                            }
-                            byte[] decodedScreen = Base64.getDecoder().decode(result);
-                            ByteArrayInputStream bais = new ByteArrayInputStream(decodedScreen);
 
-                            // Create a SendPhoto object with the chat ID and the InputStream
-                            SendPhoto photo = new SendPhoto();
-                            photo.setChatId(chatId);
-                            photo.setPhoto(new InputFile(bais, "screenshot.png"));
-                            try {
-                                execute(photo);
-                            } catch (TelegramApiException e) {
-                                throw new RuntimeException(e);
-                            }
                             sendMessage(chatId, "Done");
                             break;
                         } else sendMessage(chatId, "Incorrect format of data");
@@ -122,4 +140,12 @@ public class TelegramBot extends TelegramLongPollingBot{
 
         }
     }
+//    public void sendPeriodicMessage(Long chatId) {
+//        sendMessage(chatId, "Attendance is being scanned...");
+//    }
+//    @Scheduled(fixedRate = 300000) // 300,000 milliseconds = 5 minutes
+//    public void sendPeriodicMessageToUsers() {
+//        if(isScanning)
+//            sendPeriodicMessage(chatIdCopy);
+//    }
 }

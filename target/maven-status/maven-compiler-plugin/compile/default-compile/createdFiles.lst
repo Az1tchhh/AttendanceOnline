@@ -1,6 +1,10 @@
+com\example\automatedattendancesystemspring\models\Student.class
 com\example\automatedattendancesystemspring\BotInitializer.class
 com\example\automatedattendancesystemspring\service\AttendanceService.class
+com\example\automatedattendancesystemspring\models\AttendanceInfo.class
+com\example\automatedattendancesystemspring\repository\AttendanceInfoRepository.class
 com\example\automatedattendancesystemspring\TelegramBot.class
 com\example\automatedattendancesystemspring\config\BotConfig.class
 com\example\automatedattendancesystemspring\AutomatedAttendanceSystemSpringApplication.class
 com\example\automatedattendancesystemspring\controller\AttendanceController.class
+com\example\automatedattendancesystemspring\repository\StudentRepository.class

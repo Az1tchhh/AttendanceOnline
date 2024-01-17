@@ -1,6 +1,10 @@
-C:\Users\azama\OneDrive\Р”РѕРєСѓРјРµРЅС‚С‹\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\BotInitializer.java
-C:\Users\azama\OneDrive\Р”РѕРєСѓРјРµРЅС‚С‹\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\config\BotConfig.java
-C:\Users\azama\OneDrive\Р”РѕРєСѓРјРµРЅС‚С‹\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\AutomatedAttendanceSystemSpringApplication.java
-C:\Users\azama\OneDrive\Р”РѕРєСѓРјРµРЅС‚С‹\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\controller\AttendanceController.java
-C:\Users\azama\OneDrive\Р”РѕРєСѓРјРµРЅС‚С‹\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\service\AttendanceService.java
-C:\Users\azama\OneDrive\Р”РѕРєСѓРјРµРЅС‚С‹\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\TelegramBot.java
+C:\Users\azama\OneDrive\Документы\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\BotInitializer.java
+C:\Users\azama\OneDrive\Документы\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\config\BotConfig.java
+C:\Users\azama\OneDrive\Документы\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\repository\StudentRepository.java
+C:\Users\azama\OneDrive\Документы\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\repository\AttendanceInfoRepository.java
+C:\Users\azama\OneDrive\Документы\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\models\AttendanceInfo.java
+C:\Users\azama\OneDrive\Документы\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\models\Student.java
+C:\Users\azama\OneDrive\Документы\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\AutomatedAttendanceSystemSpringApplication.java
+C:\Users\azama\OneDrive\Документы\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\controller\AttendanceController.java
+C:\Users\azama\OneDrive\Документы\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\service\AttendanceService.java
+C:\Users\azama\OneDrive\Документы\AutomatedAttendanceSystemSpring\src\main\java\com\example\automatedattendancesystemspring\TelegramBot.java

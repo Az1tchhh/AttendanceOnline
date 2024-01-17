@@ -60,6 +60,13 @@ public class AttendanceService {
             WebElement buttonToAttendancePage = driver.findElement(By.xpath("//div[contains(@class, 'v-link')]//a[contains(@href, 'https://wsp.kbtu.kz/RegistrationOnline')]"));
             buttonToAttendancePage.click();
 
+//            Thread.sleep(2000);
+            /*TO-DO
+            4
+
+
+
+            */
             Thread.sleep(2000);
             byte[] screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.BYTES);
             driver.close();
