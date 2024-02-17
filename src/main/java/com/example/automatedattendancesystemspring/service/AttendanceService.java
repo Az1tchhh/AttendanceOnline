@@ -11,13 +11,16 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -26,6 +29,7 @@ public class AttendanceService {
     private AttendanceInfoRepository attendanceInfoRepository;
     @Autowired
     private StudentRepository studentRepository;
+
     public String markAttendance(String email, String password) throws InterruptedException {
 
         ChromeOptions options = new ChromeOptions();
@@ -33,11 +37,16 @@ public class AttendanceService {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = new ChromeDriver(options);
         try {
-            driver.get("https://wsp.kbtu.kz");
+            driver.get("https://wsp.kbtu.kz/RegistrationOnline");
 
             Thread.sleep(2000);
-            WebElement buttonQuit = driver.findElement(By.xpath("//div[contains(@class, 'v-button')]//img[contains(@src, 'login_24.png')]"));
-            buttonQuit.click();
+            try{
+                WebElement buttonQuit = driver.findElement(By.xpath("//div[contains(@class, 'v-button')]//img[contains(@src, 'login_24.png')]"));
+                buttonQuit.click();
+            }catch (Exception e){
+                System.out.println("No quit element");
+            }
+
 
             Thread.sleep(2000);
             WebElement email_area = driver.findElement(By.id("gwt-uid-4"));
@@ -49,32 +58,45 @@ public class AttendanceService {
             password_area.clear();
             password_area.sendKeys(password);
 
-            Thread.sleep(2000);
+            Thread.sleep(1000);
             password_area.sendKeys(Keys.ENTER);
 
-            Thread.sleep(2000);
-            WebElement buttonToMainPage = driver.findElement(By.xpath("//div[contains(@class, 'v-button')]//img[contains(@src, 'home.png')]"));
-            buttonToMainPage.click();
-
-            Thread.sleep(2000);
-            WebElement buttonToAttendancePage = driver.findElement(By.xpath("//div[contains(@class, 'v-link')]//a[contains(@href, 'https://wsp.kbtu.kz/RegistrationOnline')]"));
-            buttonToAttendancePage.click();
+//            Thread.sleep(2000);
+//            WebElement buttonToMainPage = driver.findElement(By.xpath("//div[contains(@class, 'v-button')]//img[contains(@src, 'home.png')]"));
+//            buttonToMainPage.click();
 
 //            Thread.sleep(2000);
-            /*TO-DO
-            4
+//            WebElement buttonToAttendancePage = driver.findElement(By.xpath("//div[contains(@class, 'v-link')]//a[contains(@href, 'https://wsp.kbtu.kz/RegistrationOnline')]"));
+//            buttonToAttendancePage.click();
 
+//            Thread.sleep(2000);
 
-
-            */
             Thread.sleep(2000);
-            byte[] screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.BYTES);
-            driver.close();
+            try{
+                while(true) {
+                    Thread.sleep(30000);
+                    List<WebElement> buttonToMarks = driver.findElements(By.xpath("//div[contains(@class, 'v-button v-widget primary v-button-primary')]"));
+                    System.out.println(buttonToMarks.isEmpty());
+                    if (!buttonToMarks.isEmpty()) {
+                        for (WebElement buttonToMark : buttonToMarks) {
+                            System.out.println("click");
+                            buttonToMark.click();
+                            Thread.sleep(500);
+                        }
+                        byte[] screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.BYTES);
+                        driver.close();
 
+                        Student currentStudent = saveStudent(email);
+                        saveAttendanceInfo(currentStudent, "subject");
+                        return Base64.getEncoder().encodeToString(screenshot);
+                    }
+                    driver.navigate().refresh();
+                }
+            }catch (Exception e){
+                System.out.println("error");
+                return "no attendance";
+            }
 
-            Student currentStudent = saveStudent(email);
-            saveAttendanceInfo(currentStudent, "subject");
-            return Base64.getEncoder().encodeToString(screenshot);
         }catch (Exception e){
             driver.close();
             return "Something went wrong";

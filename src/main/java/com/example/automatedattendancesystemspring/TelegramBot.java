@@ -4,6 +4,7 @@ import com.example.automatedattendancesystemspring.config.BotConfig;
 import com.example.automatedattendancesystemspring.models.Student;
 import com.example.automatedattendancesystemspring.service.AttendanceService;
 import lombok.AllArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -43,8 +44,13 @@ public class TelegramBot extends TelegramLongPollingBot{
         if(update.hasMessage() && update.getMessage().hasText()){
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
-
+            System.out.println(update.getMessage().getMessageId());
             switch (messageText){
+                case "/stop":
+                    sendMessage(chatId, "Stopped");
+                    waitingForCredentials.put(chatId, false);
+                    waitingForLogin.put(chatId, false);
+                    break;
                 case "/start":
                     startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                     break;
@@ -77,14 +83,17 @@ public class TelegramBot extends TelegramLongPollingBot{
                             String login = credentials[0];
                             String password = credentials[1];
                             sendMessage(chatId, "Marking attendance...");
+                            sendMessage(chatId, "You can leave the rest to me");
                             isScanning = true;
                             try {
+                                int iterations = 0;
                                 while (isScanning){
-
+                                    iterations++;
                                     String msg = update.getMessage().getText();
-                                    System.out.println(msg);
-                                    if(msg.equals("/stop")){
-                                        isScanning = false;
+                                    System.out.println(iterations);
+                                    if(iterations >= 3){
+                                        sendMessage(chatId, "No attendances found, try again...");
+                                        break;
                                     }
                                     result = attendanceService.markAttendance(login, password);
                                     if (result.equals("Something went wrong")) {
@@ -92,7 +101,6 @@ public class TelegramBot extends TelegramLongPollingBot{
                                         break;
                                     }
                                     else if(result.equals("no attendance")){
-                                        sendMessage(chatId, "Scanning for any attendance. Enter '/stop' to terminate the process");
                                         continue;
                                     }
                                     byte[] decodedScreen = Base64.getDecoder().decode(result);
@@ -126,7 +134,7 @@ public class TelegramBot extends TelegramLongPollingBot{
     private void startCommandReceived(Long chatId, String name) {
         String answer = "Hi, " + name + ", nice to meet you!" + "\n" +
                 "If you want to sign attendance whenever it starts," + "\n" +
-                "type /mark below";
+                "type /mark below" + "("+chatId+")";
         sendMessage(chatId, answer);
     }
 
